@@ -1,0 +1,82 @@
+% Store the channel ID for the moisture sensor channel.
+channelID = 1226802;
+
+% Provide the ThingSpeak alerts API key.  All alerts API keys start with TAK.
+alertApiKey = 'TAKXXXXXXXXXXXXX';
+
+% Set the address for the HTTTP call
+alertUrl="https://api.thingspeak.com/alerts/send";
+
+% webwrite uses weboptions to add required headers.  Alerts needs a ThingSpeak-Alerts-API-Key header.
+options = weboptions("HeaderFields", ["ThingSpeak-Alerts-API-Key", alertApiKey ]);
+
+% Set the email subject.
+alertSubject = sprintf("Plant Node Information");
+
+
+% Read the recent data from each field
+HData = thingSpeakRead(channelID,'NumPoints',1,'Fields',1,'OutputFormat','timetable');
+STData = thingSpeakRead(channelID,'NumPoints',1,'Fields',2,'OutputFormat','timetable');
+ATData = thingSpeakRead(channelID,'NumPoints',1,'Fields',3,'OutputFormat','timetable');
+SMData = thingSpeakRead(channelID,'NumPoints',1,'Fields',4,'OutputFormat','timetable');
+SIData = thingSpeakRead(channelID,'NumPoints',1,'Fields',5,'OutputFormat','timetable');
+% Check to make sure the data was read correctly from the channel.
+if isempty(HData)
+    alertBody = ' No humidity data read. ';      
+elseif isempty(STData)
+    alertBody = ' No soil tempature data read. '; 
+elseif isempty(ATData)
+    alertBody = ' No Ambient Tempature data read. '; 
+elseif isempty(SMData)
+    alertBody = ' No Soil moisture data read from plant. '; 
+elseif isempty(SIData)
+    alertBody = ' No Sunlight data read. '; 
+else
+    %Determine threshold values.
+    maxVal = 80; %static for testing
+    minVal = 10; %static for testing
+    MaxLight = 900; %static for testing
+    MinLight = 100; %static for testing
+    
+    % Get the most recent point in the array of moisture data.
+    lastHValue = str2double(HData); 
+    lastSTValue = str2double(STData); 
+    lastATValue = str2double(ATData); 
+    lastSMValue = str2double(SMData); 
+    lastSIValue = str2double(SIData); 
+    
+        % Set the outgoing message
+    if (lastHValue<=minVal)
+        alertBody = ' Humidity Low! ';
+    elseif (lastHValue>maxVal)
+        alertBody = ' Humidity High!';
+    end
+    if (lastSTValue<=minVal)
+        alertBody = ' Soil Tempature Low! ';
+    elseif (lastSTValue>maxVal)
+        alertBody = ' Soil Tempature High! ';
+    end
+    if (lastATValue<=minVal)
+        alertBody = ' Atmospheric Tempature Low! ';
+    elseif (lastATValue>maxVal)
+        alertBody = ' Atmospheric Tempature High!';
+    end
+    if (lastSMValue<=minVal)
+        alertBody = ' Soil Moisture Low! ';
+    elseif (lastSMValue>maxVal)
+        alertBody = ' Soil Moisture High!';
+    end
+    % Set the outgoing message
+    if (lastSIValue<=MinLight)
+        alertBody = ' I need water! ';
+    elseif (lastSIValue>MaxLight)
+        alertBody = ' No water needed. ';
+    end
+end
+ 
+ % Catch errors so the MATLAB code does not disable a TimeControl if it fails
+try
+    webwrite(alertUrl , "body", alertBody, "subject", alertSubject, options);
+catch someException
+    fprintf("Failed to send alert: %s\n", someException.message);
+end
