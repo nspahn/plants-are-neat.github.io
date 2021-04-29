@@ -35,9 +35,9 @@ The current state of the project features a mother node requesting data from all
 | Self healing requires correct installation | If each node is not installed within range of at least two other nodes, the network may not be able to self heal | Make sure that each sensor node is installed within range of at least two other sensor nodes |
 | NODEjs crashes upon selecting a port | Serial ports can’t be read using different programs simultaneously | Close all other applications reading or writing to the port, most likely culprit is the Arduino IDE | 
 ## Possible Future Improvements
-' Expanding the node network beyond our test 4, integrating automatic node IDs and being able to toggle between all of these data displays
-' Change visualisation page to display multiple nodes at once. 
-' Expanded sensor readings
-' Use wifi-enabled board so it can run continuously
-' Fix boost converter auto-bypass issue
-' Use a Raspberry Pi as a continuously running server that can read serial data via USB input
+- Expanding the node network beyond our test 4, integrating automatic node IDs and being able to toggle between all of these data displays
+- Change visualisation page to display multiple nodes at once. 
+- Expanded sensor readings
+- Use wifi-enabled board so it can run continuously
+- Fix boost converter auto-bypass issue
+- Use a Raspberry Pi as a continuously running server that can read serial data via USB input
